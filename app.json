@@ -1,0 +1,27 @@
+{
+  "expo": {
+    "name": "Hello Visto",
+    "slug": "hello-visto-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#FF6B6B"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#FF6B6B"
+      }
+    },
+    "plugins": [
+      "expo-font"
+    ]
+  }
+}
