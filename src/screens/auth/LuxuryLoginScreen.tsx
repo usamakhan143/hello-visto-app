@@ -40,12 +40,29 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
 
     setLoading(true);
     try {
-      await AuthService.signIn(email, password);
-      navigation.navigate("CustomerMain");
-    } catch (error) {
+      const { user, userData } = await AuthService.signIn(email, password);
+
+      // Navigate based on user role
+      if (userData?.userType === "vendor") {
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "VendorMain" }],
+        });
+      } else if (userData?.userType === "admin") {
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "AdminMain" }],
+        });
+      } else {
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "CustomerMain" }],
+        });
+      }
+    } catch (error: any) {
       Alert.alert(
         "Login Failed",
-        "Please check your credentials and try again.",
+        error.message || "Please check your credentials and try again.",
       );
     } finally {
       setLoading(false);

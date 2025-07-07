@@ -42,7 +42,7 @@ const onboardingData = [
     title: "Extraordinary\nMemories Await",
     description:
       "Join an elite community of travelers exploring the world's most sought-after destinations.",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600",
+    image: "https://images.pexels.com/photos/952842/pexels-photo-952842.jpeg",
     icon: "sparkles-outline",
     color: COLORS.accent,
   },

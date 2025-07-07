@@ -27,7 +27,7 @@ export default function SignUpScreen({ navigation }: SignUpScreenProps) {
     email: "",
     password: "",
     confirmPassword: "",
-    role: "customer" as "customer" | "vendor",
+    userType: "customer" as "customer" | "vendor",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -60,15 +60,44 @@ export default function SignUpScreen({ navigation }: SignUpScreenProps) {
 
     setLoading(true);
     try {
-      await AuthService.signUp(formData.email, formData.password, {
-        name: formData.name,
-        role: formData.role,
-      });
+      const { user, userData } = await AuthService.signUp(
+        formData.email,
+        formData.password,
+        {
+          displayName: formData.name,
+          userType: formData.userType,
+        },
+      );
+
       Alert.alert("Success", "Account created successfully!", [
-        { text: "OK", onPress: () => navigation.navigate("Login") },
+        {
+          text: "OK",
+          onPress: () => {
+            // Navigate based on selected role
+            if (formData.userType === "vendor") {
+              navigation.reset({
+                index: 0,
+                routes: [{ name: "VendorMain" }],
+              });
+            } else if (formData.userType === "admin") {
+              navigation.reset({
+                index: 0,
+                routes: [{ name: "AdminMain" }],
+              });
+            } else {
+              navigation.reset({
+                index: 0,
+                routes: [{ name: "CustomerMain" }],
+              });
+            }
+          },
+        },
       ]);
-    } catch (error) {
-      Alert.alert("Error", "Sign up failed. Please try again.");
+    } catch (error: any) {
+      Alert.alert(
+        "Error",
+        error.message || "Sign up failed. Please try again.",
+      );
     } finally {
       setLoading(false);
     }
@@ -107,14 +136,15 @@ export default function SignUpScreen({ navigation }: SignUpScreenProps) {
                   <TouchableOpacity
                     style={[
                       styles.roleButton,
-                      formData.role === "customer" && styles.activeRoleButton,
+                      formData.userType === "customer" &&
+                        styles.activeRoleButton,
                     ]}
-                    onPress={() => handleInputChange("role", "customer")}
+                    onPress={() => handleInputChange("userType", "customer")}
                   >
                     <Text
                       style={[
                         styles.roleButtonText,
-                        formData.role === "customer" &&
+                        formData.userType === "customer" &&
                           styles.activeRoleButtonText,
                       ]}
                     >
@@ -124,14 +154,14 @@ export default function SignUpScreen({ navigation }: SignUpScreenProps) {
                   <TouchableOpacity
                     style={[
                       styles.roleButton,
-                      formData.role === "vendor" && styles.activeRoleButton,
+                      formData.userType === "vendor" && styles.activeRoleButton,
                     ]}
-                    onPress={() => handleInputChange("role", "vendor")}
+                    onPress={() => handleInputChange("userType", "vendor")}
                   >
                     <Text
                       style={[
                         styles.roleButtonText,
-                        formData.role === "vendor" &&
+                        formData.userType === "vendor" &&
                           styles.activeRoleButtonText,
                       ]}
                     >

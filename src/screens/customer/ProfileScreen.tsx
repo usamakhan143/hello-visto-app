@@ -94,7 +94,15 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
       {
         text: "Logout",
         style: "destructive",
-        onPress: () => navigation.navigate("Onboarding"),
+        onPress: async () => {
+          try {
+            const { AuthService } = await import("../../services/firebase");
+            await AuthService.signOut();
+            // AuthContext will automatically handle navigation
+          } catch (error: any) {
+            Alert.alert("Error", error.message || "Failed to logout");
+          }
+        },
       },
     ]);
   };

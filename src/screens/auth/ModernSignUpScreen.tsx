@@ -36,7 +36,7 @@ export default function ModernSignUpScreen({ navigation }: SignUpScreenProps) {
     email: "",
     password: "",
     confirmPassword: "",
-    role: "customer" as "customer" | "vendor",
+    userType: "customer" as "customer" | "vendor",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -51,8 +51,8 @@ export default function ModernSignUpScreen({ navigation }: SignUpScreenProps) {
     }
   };
 
-  const handleRoleChange = (role: "customer" | "vendor") => {
-    setFormData({ ...formData, role });
+  const handleRoleChange = (userType: "customer" | "vendor") => {
+    setFormData({ ...formData, userType });
   };
 
   const validateForm = () => {
@@ -94,25 +94,44 @@ export default function ModernSignUpScreen({ navigation }: SignUpScreenProps) {
 
     setLoading(true);
     try {
-      await AuthService.signUp(formData.email, formData.password, {
-        name: formData.name,
-        role: formData.role,
-      });
+      const { user, userData } = await AuthService.signUp(
+        formData.email,
+        formData.password,
+        {
+          displayName: formData.name,
+          userType: formData.userType,
+        },
+      );
+
       Alert.alert("Success", "Account created successfully!", [
         {
           text: "Continue",
           onPress: () => {
             // Navigate based on selected role
-            if (formData.role === "vendor") {
-              navigation.navigate("VendorMain");
+            if (formData.userType === "vendor") {
+              navigation.reset({
+                index: 0,
+                routes: [{ name: "VendorMain" }],
+              });
+            } else if (formData.userType === "admin") {
+              navigation.reset({
+                index: 0,
+                routes: [{ name: "AdminMain" }],
+              });
             } else {
-              navigation.navigate("CustomerMain");
+              navigation.reset({
+                index: 0,
+                routes: [{ name: "CustomerMain" }],
+              });
             }
           },
         },
       ]);
-    } catch (error) {
-      Alert.alert("Sign Up Failed", "Please try again or contact support.");
+    } catch (error: any) {
+      Alert.alert(
+        "Sign Up Failed",
+        error.message || "Please try again or contact support.",
+      );
     } finally {
       setLoading(false);
     }
@@ -180,7 +199,7 @@ export default function ModernSignUpScreen({ navigation }: SignUpScreenProps) {
               <TouchableOpacity
                 style={[
                   styles.roleOption,
-                  formData.role === "customer" && styles.activeRoleOption,
+                  formData.userType === "customer" && styles.activeRoleOption,
                 ]}
                 onPress={() => handleRoleChange("customer")}
               >
@@ -189,7 +208,7 @@ export default function ModernSignUpScreen({ navigation }: SignUpScreenProps) {
                     name="airplane-outline"
                     size={24}
                     color={
-                      formData.role === "customer"
+                      formData.userType === "customer"
                         ? COLORS.white
                         : COLORS.primary
                     }
@@ -198,7 +217,7 @@ export default function ModernSignUpScreen({ navigation }: SignUpScreenProps) {
                 <Text
                   style={[
                     styles.roleOptionTitle,
-                    formData.role === "customer" &&
+                    formData.userType === "customer" &&
                       styles.activeRoleOptionTitle,
                   ]}
                 >
@@ -207,7 +226,7 @@ export default function ModernSignUpScreen({ navigation }: SignUpScreenProps) {
                 <Text
                   style={[
                     styles.roleOptionDescription,
-                    formData.role === "customer" &&
+                    formData.userType === "customer" &&
                       styles.activeRoleOptionDescription,
                   ]}
                 >
@@ -218,7 +237,7 @@ export default function ModernSignUpScreen({ navigation }: SignUpScreenProps) {
               <TouchableOpacity
                 style={[
                   styles.roleOption,
-                  formData.role === "vendor" && styles.activeRoleOption,
+                  formData.userType === "vendor" && styles.activeRoleOption,
                 ]}
                 onPress={() => handleRoleChange("vendor")}
               >
@@ -227,7 +246,7 @@ export default function ModernSignUpScreen({ navigation }: SignUpScreenProps) {
                     name="business-outline"
                     size={24}
                     color={
-                      formData.role === "vendor"
+                      formData.userType === "vendor"
                         ? COLORS.white
                         : COLORS.secondary
                     }
@@ -236,7 +255,8 @@ export default function ModernSignUpScreen({ navigation }: SignUpScreenProps) {
                 <Text
                   style={[
                     styles.roleOptionTitle,
-                    formData.role === "vendor" && styles.activeRoleOptionTitle,
+                    formData.userType === "vendor" &&
+                      styles.activeRoleOptionTitle,
                   ]}
                 >
                   Sell Tours
@@ -244,7 +264,7 @@ export default function ModernSignUpScreen({ navigation }: SignUpScreenProps) {
                 <Text
                   style={[
                     styles.roleOptionDescription,
-                    formData.role === "vendor" &&
+                    formData.userType === "vendor" &&
                       styles.activeRoleOptionDescription,
                   ]}
                 >

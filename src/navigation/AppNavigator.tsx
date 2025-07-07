@@ -3,6 +3,8 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
+import { useAuth } from "../contexts/AuthContext";
+import { ActivityIndicator, View } from "react-native";
 
 // Auth Screens
 import LoginScreen from "../screens/auth/LoginScreen";
@@ -152,31 +154,50 @@ function AdminTabs() {
 }
 
 export default function AppNavigator() {
-  // In a real app, you'd determine the user role from authentication state
-  const userRole = "customer"; // This would come from your auth context
+  const { user, userProfile, loading } = useAuth();
+
+  // Show loading spinner while checking auth state
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+      </View>
+    );
+  }
 
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Onboarding" component={OnboardingScreen} />
-        <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="SignUp" component={SignUpScreen} />
+        {!user ? (
+          // Unauthenticated stack
+          <>
+            <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="SignUp" component={SignUpScreen} />
+          </>
+        ) : (
+          // Authenticated stack based on user role
+          <>
+            {userProfile?.userType === "customer" && (
+              <Stack.Screen name="CustomerMain" component={CustomerTabs} />
+            )}
+            {userProfile?.userType === "vendor" && (
+              <Stack.Screen name="VendorMain" component={VendorTabs} />
+            )}
+            {userProfile?.userType === "admin" && (
+              <Stack.Screen name="AdminMain" component={AdminTabs} />
+            )}
 
-        {userRole === "customer" && (
-          <Stack.Screen name="CustomerMain" component={CustomerTabs} />
+            <Stack.Screen name="TourDetails" component={TourDetailsScreen} />
+            <Stack.Screen name="AddTour" component={AddTourScreen} />
+            <Stack.Screen name="Subscription" component={SubscriptionScreen} />
+            <Stack.Screen
+              name="Notifications"
+              component={NotificationsScreen}
+            />
+            <Stack.Screen name="Reviews" component={ReviewsScreen} />
+          </>
         )}
-        {userRole === "vendor" && (
-          <Stack.Screen name="VendorMain" component={VendorTabs} />
-        )}
-        {userRole === "admin" && (
-          <Stack.Screen name="AdminMain" component={AdminTabs} />
-        )}
-
-        <Stack.Screen name="TourDetails" component={TourDetailsScreen} />
-        <Stack.Screen name="AddTour" component={AddTourScreen} />
-        <Stack.Screen name="Subscription" component={SubscriptionScreen} />
-        <Stack.Screen name="Notifications" component={NotificationsScreen} />
-        <Stack.Screen name="Reviews" component={ReviewsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

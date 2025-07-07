@@ -61,8 +61,7 @@ const onboardingData = [
     subtitle: "CONNECT • SHARE • INSPIRE",
     description:
       "Join an exclusive community of luxury travelers and discover hidden gems around the globe.",
-    image:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1200&q=90",
+    image: "https://images.pexels.com/photos/952842/pexels-photo-952842.jpeg",
     video:
       "https://assets.mixkit.co/videos/preview/mixkit-couple-walking-on-the-beach-44516-large.mp4",
     icon: "sparkles",

@@ -71,17 +71,39 @@ export default function ModernLoginScreen({ navigation }: LoginScreenProps) {
 
     setLoading(true);
     try {
-      const user = await AuthService.signIn(formData.email, formData.password);
-      // Check user role and navigate accordingly
-      if (user?.role === "vendor") {
-        navigation.navigate("VendorMain");
+      const { user, userData } = await AuthService.signIn(
+        formData.email,
+        formData.password,
+      );
+
+      // Debug: Log user data to see what's being returned
+      console.log("Login userData:", userData);
+      console.log("UserType:", userData?.userType);
+
+      // Navigate based on user role
+      if (userData?.userType === "vendor") {
+        console.log("Navigating to VendorMain");
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "VendorMain" }],
+        });
+      } else if (userData?.userType === "admin") {
+        console.log("Navigating to AdminMain");
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "AdminMain" }],
+        });
       } else {
-        navigation.navigate("CustomerMain");
+        console.log("Navigating to CustomerMain");
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "CustomerMain" }],
+        });
       }
-    } catch (error) {
+    } catch (error: any) {
       Alert.alert(
         "Login Failed",
-        "Please check your credentials and try again.",
+        error.message || "Please check your credentials and try again.",
       );
     } finally {
       setLoading(false);
