@@ -47,7 +47,6 @@ const mockVendor = {
   totalReviews: 145,
   totalTours: 24,
   completedBookings: 856,
-  responseTime: "< 2 hours",
   memberSince: "2019",
   languages: ["English", "German", "French", "Arabic"],
   specialties: ["Luxury Tours", "Adventure Travel", "Cultural Experiences"],
@@ -98,7 +97,8 @@ const mockPopularTours = [
     images: [
       "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400",
     ],
-    rating: { average: 4.9, total: 45 },
+    rating: 4.9,
+    totalReviews: 45,
     duration: 7,
     maxGuests: 8,
     location: { address: "Swiss Alps, Switzerland" },
@@ -112,7 +112,8 @@ const mockPopularTours = [
     images: [
       "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=400",
     ],
-    rating: { average: 4.8, total: 32 },
+    rating: 4.8,
+    totalReviews: 32,
     duration: 14,
     maxGuests: 12,
     location: { address: "Multiple European Cities" },
@@ -126,24 +127,22 @@ export default function VendorProfileScreen({
   route,
 }: VendorProfileScreenProps) {
   const [selectedTab, setSelectedTab] = useState("about");
+
+  // Safety check for vendor data
   const vendor = route?.params?.vendor || mockVendor;
 
-  const handleCall = () => {
-    Linking.openURL(`tel:${vendor.phone}`);
-  };
-
-  const handleEmail = () => {
-    Linking.openURL(`mailto:${vendor.email}`);
-  };
-
-  const handleWhatsApp = () => {
-    const message = encodeURIComponent(
-      `Hi! I'm interested in your tour packages. Can you help me with more details?`,
+  if (!vendor) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
+          <Text>Vendor not found</Text>
+          <Button title="Go Back" onPress={() => navigation.goBack()} />
+        </View>
+      </SafeAreaView>
     );
-    Linking.openURL(
-      `https://wa.me/${vendor.phone.replace(/[^0-9]/g, "")}?text=${message}`,
-    );
-  };
+  }
 
   const handleWebsite = () => {
     Linking.openURL(`https://${vendor.website}`);
@@ -190,13 +189,77 @@ export default function VendorProfileScreen({
   );
 
   const renderTour = ({ item }: { item: any }) => (
-    <View style={styles.tourContainer}>
-      <TourCard
-        tour={item}
-        onPress={() => navigation.navigate("TourDetails", { tour: item })}
-        showVendor={false}
-      />
-    </View>
+    <TouchableOpacity
+      style={styles.tourCard}
+      onPress={() => navigation.navigate("TourDetails", { tour: item })}
+      activeOpacity={0.9}
+    >
+      <View style={styles.tourImageContainer}>
+        <Image
+          source={{ uri: item.images[0] }}
+          style={styles.tourImage}
+          resizeMode="cover"
+        />
+        <View style={styles.tourOverlay}>
+          <View style={styles.tourPrice}>
+            <Text style={styles.priceText}>${item.price}</Text>
+          </View>
+          <View style={styles.tourRating}>
+            <Ionicons name="star" size={14} color={COLORS.warning} />
+            <Text style={styles.ratingText}>
+              {Number(item.rating || 0).toFixed(1)}
+            </Text>
+          </View>
+        </View>
+      </View>
+
+      <View style={styles.tourInfo}>
+        <Text style={styles.tourTitle} numberOfLines={2}>
+          {item.title}
+        </Text>
+
+        <View style={styles.tourMeta}>
+          <View style={styles.metaItem}>
+            <Ionicons
+              name="location-outline"
+              size={14}
+              color={COLORS.textSecondary}
+            />
+            <Text style={styles.metaText} numberOfLines={1}>
+              {item.location.address}
+            </Text>
+          </View>
+
+          <View style={styles.tourDetails}>
+            <View style={styles.detailItem}>
+              <Ionicons
+                name="time-outline"
+                size={12}
+                color={COLORS.textSecondary}
+              />
+              <Text style={styles.detailText}>{item.duration} days</Text>
+            </View>
+            <View style={styles.detailItem}>
+              <Ionicons
+                name="people-outline"
+                size={12}
+                color={COLORS.textSecondary}
+              />
+              <Text style={styles.detailText}>Max {item.maxGuests}</Text>
+            </View>
+          </View>
+        </View>
+
+        {item.includes && item.includes.length > 0 && (
+          <View style={styles.includesContainer}>
+            <Text style={styles.includesTitle}>Includes:</Text>
+            <Text style={styles.includesText} numberOfLines={2}>
+              {item.includes.slice(0, 3).join(" • ")}
+            </Text>
+          </View>
+        )}
+      </View>
+    </TouchableOpacity>
   );
 
   const renderTabContent = () => {
@@ -212,32 +275,6 @@ export default function VendorProfileScreen({
                 <Ionicons name="location" size={20} color={COLORS.primary} />
                 <Text style={styles.contactText}>{vendor.address}</Text>
               </View>
-              <TouchableOpacity style={styles.contactItem} onPress={handleCall}>
-                <Ionicons name="call" size={20} color={COLORS.primary} />
-                <Text style={[styles.contactText, { color: COLORS.primary }]}>
-                  {vendor.phone}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.contactItem}
-                onPress={handleEmail}
-              >
-                <Ionicons name="mail" size={20} color={COLORS.primary} />
-                <Text style={[styles.contactText, { color: COLORS.primary }]}>
-                  {vendor.email}
-                </Text>
-              </TouchableOpacity>
-              {vendor.website && (
-                <TouchableOpacity
-                  style={styles.contactItem}
-                  onPress={handleWebsite}
-                >
-                  <Ionicons name="globe" size={20} color={COLORS.primary} />
-                  <Text style={[styles.contactText, { color: COLORS.primary }]}>
-                    {vendor.website}
-                  </Text>
-                </TouchableOpacity>
-              )}
             </View>
 
             <View style={styles.infoSection}>
@@ -296,8 +333,8 @@ export default function VendorProfileScreen({
             renderItem={renderTour}
             keyExtractor={(item) => item.id}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.tabContent}
-            numColumns={1}
+            contentContainerStyle={styles.toursContent}
+            ItemSeparatorComponent={() => <View style={styles.tourSeparator} />}
           />
         );
       default:
@@ -349,44 +386,12 @@ export default function VendorProfileScreen({
             <Text style={styles.statNumber}>{vendor.completedBookings}</Text>
             <Text style={styles.statLabel}>Happy Customers</Text>
           </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{vendor.responseTime}</Text>
-            <Text style={styles.statLabel}>Response Time</Text>
-          </View>
+
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
             <Text style={styles.statNumber}>{vendor.memberSince}</Text>
             <Text style={styles.statLabel}>Member Since</Text>
           </View>
-        </View>
-
-        {/* Action Buttons */}
-        <View style={styles.actionButtons}>
-          <Button
-            title="Call Now"
-            variant="primary"
-            size="md"
-            onPress={handleCall}
-            icon="call"
-            style={styles.actionButton}
-          />
-          <Button
-            title="WhatsApp"
-            variant="secondary"
-            size="md"
-            onPress={handleWhatsApp}
-            icon="logo-whatsapp"
-            style={styles.actionButton}
-          />
-          <Button
-            title="Email"
-            variant="outline"
-            size="md"
-            onPress={handleEmail}
-            icon="mail"
-            style={styles.actionButton}
-          />
         </View>
 
         {/* Tabs */}
@@ -415,6 +420,9 @@ export default function VendorProfileScreen({
 
         {/* Tab Content */}
         {renderTabContent()}
+
+        {/* Bottom Spacer for Bottom Navigation */}
+        <View style={styles.bottomSpacer} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -639,8 +647,118 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     lineHeight: FONT_SIZES.base * 1.4,
   },
-  tourContainer: {
-    marginBottom: SPACING.md,
+  toursContent: {
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.base,
+  },
+  tourSeparator: {
+    height: SPACING.lg,
+  },
+  tourCard: {
+    backgroundColor: COLORS.surface,
+    borderRadius: RADIUS.lg,
+    overflow: "hidden",
+    ...SHADOWS.md,
+  },
+  tourImageContainer: {
+    height: 180,
+    position: "relative",
+  },
+  tourImage: {
+    width: "100%",
+    height: "100%",
+  },
+  tourOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "space-between",
+    padding: SPACING.base,
+  },
+  tourPrice: {
+    alignSelf: "flex-start",
+    backgroundColor: COLORS.surface,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xs,
+    borderRadius: RADIUS.md,
+  },
+  priceText: {
+    fontSize: FONT_SIZES.sm,
+    fontWeight: FONT_WEIGHTS.bold,
+    color: COLORS.primary,
+  },
+  tourRating: {
+    alignSelf: "flex-end",
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.7)",
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xs,
+    borderRadius: RADIUS.md,
+    gap: SPACING.xs,
+  },
+  ratingText: {
+    fontSize: FONT_SIZES.xs,
+    fontWeight: FONT_WEIGHTS.medium,
+    color: COLORS.white,
+  },
+  tourInfo: {
+    padding: SPACING.lg,
+  },
+  tourTitle: {
+    fontSize: FONT_SIZES.lg,
+    fontWeight: FONT_WEIGHTS.bold,
+    color: COLORS.textPrimary,
+    marginBottom: SPACING.sm,
+    lineHeight: FONT_SIZES.lg * 1.2,
+  },
+  tourMeta: {
+    gap: SPACING.sm,
+    marginBottom: SPACING.base,
+  },
+  metaItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: SPACING.xs,
+  },
+  metaText: {
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.textSecondary,
+    flex: 1,
+  },
+  tourDetails: {
+    flexDirection: "row",
+    gap: SPACING.lg,
+  },
+  detailItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: SPACING.xs,
+  },
+  detailText: {
+    fontSize: FONT_SIZES.xs,
+    color: COLORS.textSecondary,
+  },
+  includesContainer: {
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+    paddingTop: SPACING.sm,
+  },
+  includesTitle: {
+    fontSize: FONT_SIZES.xs,
+    fontWeight: FONT_WEIGHTS.semiBold,
+    color: COLORS.textPrimary,
+    marginBottom: SPACING.xs,
+  },
+  includesText: {
+    fontSize: FONT_SIZES.xs,
+    color: COLORS.textSecondary,
+    lineHeight: FONT_SIZES.xs * 1.4,
+  },
+  bottomSpacer: {
+    height: 120,
   },
   starsContainer: {
     flexDirection: "row",

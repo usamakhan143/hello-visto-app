@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Image,
   Alert,
+  StatusBar,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -20,7 +21,14 @@ import {
   FONT_WEIGHTS,
   SPACING,
   RADIUS,
+  SHADOWS,
+  ACCESSIBLE_TEXT_PROPS,
 } from "../../constants";
+import {
+  responsiveFont,
+  responsiveSize,
+  responsiveSpacing,
+} from "../../utils/responsiveFont";
 
 interface ProfileScreenProps {
   navigation: any;
@@ -36,50 +44,75 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
     bio: "Passionate traveler exploring the world one destination at a time.",
     avatar:
       "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200",
+    memberSince: "Member since 2022",
   });
 
   const stats = [
-    { label: "Tours Booked", value: "12", icon: "airplane" },
-    { label: "Countries", value: "8", icon: "earth" },
-    { label: "Reviews", value: "24", icon: "star" },
+    {
+      label: "Tours Booked",
+      value: "12",
+      icon: "airplane",
+      color: COLORS.primary,
+    },
+    { label: "Countries", value: "8", icon: "earth", color: COLORS.secondary },
+    { label: "Reviews", value: "24", icon: "star", color: COLORS.warning },
+    { label: "Favorites", value: "7", icon: "heart", color: COLORS.error },
   ];
 
-  const menuItems = [
+  const menuSections = [
     {
-      id: "bookings",
-      title: "My Bookings",
-      icon: "calendar-outline",
-      onPress: () => navigation.navigate("MyBookings"),
+      title: "Travel",
+      items: [
+        {
+          id: "bookings",
+          title: "My Bookings",
+          icon: "calendar-outline",
+          badge: "3",
+          onPress: () => navigation.navigate("MyBookings"),
+        },
+        {
+          id: "favorites",
+          title: "Favorites",
+          icon: "heart-outline",
+          badge: "7",
+          onPress: () => navigation.navigate("Favorites"),
+        },
+        {
+          id: "reviews",
+          title: "My Reviews",
+          icon: "star-outline",
+          onPress: () => navigation.navigate("Reviews"),
+        },
+      ],
     },
     {
-      id: "wishlist",
-      title: "Wishlist",
-      icon: "heart-outline",
-      onPress: () => navigation.navigate("Wishlist"),
-    },
-    {
-      id: "reviews",
-      title: "My Reviews",
-      icon: "star-outline",
-      onPress: () => navigation.navigate("MyReviews"),
-    },
-    {
-      id: "notifications",
-      title: "Notifications",
-      icon: "notifications-outline",
-      onPress: () => navigation.navigate("Notifications"),
-    },
-    {
-      id: "support",
-      title: "Help & Support",
-      icon: "help-circle-outline",
-      onPress: () => navigation.navigate("Support"),
-    },
-    {
-      id: "settings",
-      title: "Settings",
-      icon: "settings-outline",
-      onPress: () => navigation.navigate("Settings"),
+      title: "Account",
+      items: [
+        {
+          id: "notifications",
+          title: "Notifications",
+          icon: "notifications-outline",
+          onPress: () => navigation.navigate("Notifications"),
+        },
+        {
+          id: "privacy",
+          title: "Privacy & Security",
+          icon: "shield-checkmark-outline",
+          onPress: () => navigation.navigate("Privacy"),
+        },
+        {
+          id: "support",
+          title: "Help & Support",
+          icon: "help-circle-outline",
+          onPress: () => navigation.navigate("Support"),
+        },
+        {
+          id: "settings",
+          title: "Settings",
+          icon: "settings-outline",
+          onPress: () => navigation.navigate("Settings"),
+        },
+      ],
     },
   ];
 
@@ -98,7 +131,6 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
           try {
             const { AuthService } = await import("../../services/firebase");
             await AuthService.signOut();
-            // AuthContext will automatically handle navigation
           } catch (error: any) {
             Alert.alert("Error", error.message || "Failed to logout");
           }
@@ -109,7 +141,9 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
+
+      {/* Header - Consistent with other screens */}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
@@ -130,11 +164,11 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
         </TouchableOpacity>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Profile Header */}
+      <ScrollView showsVerticalScrollIndicator={false} style={styles.content}>
+        {/* Profile Header Card */}
         <Card variant="elevated" style={styles.profileCard}>
           <LinearGradient
-            colors={[COLORS.primary, COLORS.primaryDark]}
+            colors={[COLORS.primary, COLORS.primaryLight || COLORS.accent]}
             style={styles.profileGradient}
           >
             <View style={styles.profileHeader}>
@@ -143,6 +177,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
                   source={{ uri: userProfile.avatar }}
                   style={styles.avatar}
                 />
+                <View style={styles.statusDot} />
                 {isEditing && (
                   <TouchableOpacity style={styles.avatarEdit}>
                     <Ionicons name="camera" size={16} color={COLORS.white} />
@@ -150,32 +185,40 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
                 )}
               </View>
 
-              {isEditing ? (
-                <Input
-                  value={userProfile.name}
-                  onChangeText={(text) =>
-                    setUserProfile({ ...userProfile, name: text })
-                  }
-                  style={styles.nameInput}
-                />
-              ) : (
+              <View style={styles.profileInfo}>
                 <Text style={styles.profileName}>{userProfile.name}</Text>
-              )}
-
-              <Text style={styles.profileEmail}>{userProfile.email}</Text>
-            </View>
-
-            {/* Stats */}
-            <View style={styles.statsContainer}>
-              {stats.map((stat, index) => (
-                <View key={index} style={styles.statItem}>
-                  <Ionicons name={stat.icon} size={20} color={COLORS.white} />
-                  <Text style={styles.statValue}>{stat.value}</Text>
-                  <Text style={styles.statLabel}>{stat.label}</Text>
+                <Text style={styles.profileEmail}>{userProfile.email}</Text>
+                <View style={styles.memberBadge}>
+                  <Ionicons name="diamond" size={12} color={COLORS.warning} />
+                  <Text style={styles.memberText}>Premium Member</Text>
                 </View>
-              ))}
+                <Text style={styles.memberSince}>
+                  {userProfile.memberSince}
+                </Text>
+              </View>
             </View>
           </LinearGradient>
+        </Card>
+
+        {/* Travel Stats */}
+        <Card variant="elevated" style={styles.statsCard}>
+          <Text style={styles.sectionTitle}>Travel Statistics</Text>
+          <View style={styles.statsGrid}>
+            {stats.map((stat, index) => (
+              <View key={index} style={styles.statItem}>
+                <View
+                  style={[
+                    styles.statIcon,
+                    { backgroundColor: `${stat.color}15` },
+                  ]}
+                >
+                  <Ionicons name={stat.icon} size={20} color={stat.color} />
+                </View>
+                <Text style={styles.statValue}>{stat.value}</Text>
+                <Text style={styles.statLabel}>{stat.label}</Text>
+              </View>
+            ))}
+          </View>
         </Card>
 
         {/* Profile Information */}
@@ -183,6 +226,14 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
           <Card variant="elevated" style={styles.editCard}>
             <Text style={styles.sectionTitle}>Edit Profile</Text>
             <View style={styles.form}>
+              <Input
+                label="Full Name"
+                value={userProfile.name}
+                onChangeText={(text) =>
+                  setUserProfile({ ...userProfile, name: text })
+                }
+                leftIcon="person-outline"
+              />
               <Input
                 label="Phone Number"
                 value={userProfile.phone}
@@ -220,7 +271,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
           </Card>
         ) : (
           <Card variant="elevated" style={styles.infoCard}>
-            <Text style={styles.sectionTitle}>About</Text>
+            <Text style={styles.sectionTitle}>Personal Information</Text>
             <View style={styles.infoItem}>
               <Ionicons
                 name="call-outline"
@@ -239,7 +290,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
             </View>
             <View style={styles.infoItem}>
               <Ionicons
-                name="person-outline"
+                name="chatbubble-outline"
                 size={20}
                 color={COLORS.textSecondary}
               />
@@ -248,34 +299,45 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
           </Card>
         )}
 
-        {/* Menu Items */}
-        <Card variant="elevated" style={styles.menuCard}>
-          <Text style={styles.sectionTitle}>Account</Text>
-          {menuItems.map((item) => (
-            <TouchableOpacity
-              key={item.id}
-              style={styles.menuItem}
-              onPress={item.onPress}
-            >
-              <View style={styles.menuItemLeft}>
-                <View
-                  style={[
-                    styles.menuIcon,
-                    { backgroundColor: `${COLORS.primary}15` },
-                  ]}
-                >
-                  <Ionicons name={item.icon} size={20} color={COLORS.primary} />
+        {/* Menu Sections */}
+        {menuSections.map((section, sectionIndex) => (
+          <Card key={section.title} variant="elevated" style={styles.menuCard}>
+            <Text style={styles.sectionTitle}>{section.title}</Text>
+            {section.items.map((item, index) => (
+              <TouchableOpacity
+                key={item.id}
+                style={[
+                  styles.menuItem,
+                  index === section.items.length - 1 && styles.lastMenuItem,
+                ]}
+                onPress={item.onPress}
+              >
+                <View style={styles.menuItemLeft}>
+                  <View style={styles.menuIcon}>
+                    <Ionicons
+                      name={item.icon}
+                      size={20}
+                      color={COLORS.primary}
+                    />
+                  </View>
+                  <Text style={styles.menuTitle}>{item.title}</Text>
                 </View>
-                <Text style={styles.menuTitle}>{item.title}</Text>
-              </View>
-              <Ionicons
-                name="chevron-forward"
-                size={20}
-                color={COLORS.textSecondary}
-              />
-            </TouchableOpacity>
-          ))}
-        </Card>
+                <View style={styles.menuItemRight}>
+                  {item.badge && (
+                    <View style={styles.badge}>
+                      <Text style={styles.badgeText}>{item.badge}</Text>
+                    </View>
+                  )}
+                  <Ionicons
+                    name="chevron-forward"
+                    size={20}
+                    color={COLORS.textSecondary}
+                  />
+                </View>
+              </TouchableOpacity>
+            ))}
+          </Card>
+        ))}
 
         {/* Logout */}
         <Card variant="elevated" style={styles.logoutCard}>
@@ -292,6 +354,9 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
             © 2024 Hello Visto. All rights reserved.
           </Text>
         </View>
+
+        {/* Bottom Spacer */}
+        <View style={styles.bottomSpacer} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -340,9 +405,12 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
+  content: {
+    flex: 1,
+    paddingHorizontal: SPACING.lg,
+  },
   profileCard: {
-    marginHorizontal: SPACING.lg,
-    marginBottom: SPACING.base,
+    marginBottom: SPACING.lg,
     padding: 0,
     overflow: "hidden",
   },
@@ -350,32 +418,46 @@ const styles = StyleSheet.create({
     padding: SPACING.xl,
   },
   profileHeader: {
+    flexDirection: "row",
     alignItems: "center",
-    marginBottom: SPACING.lg,
   },
   avatarContainer: {
     position: "relative",
-    marginBottom: SPACING.base,
+    marginRight: SPACING.lg,
   },
   avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: RADIUS.full,
-    borderWidth: 4,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    borderWidth: 3,
+    borderColor: COLORS.white,
+  },
+  statusDot: {
+    position: "absolute",
+    bottom: 2,
+    right: 2,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: COLORS.success,
+    borderWidth: 2,
     borderColor: COLORS.white,
   },
   avatarEdit: {
     position: "absolute",
-    bottom: 0,
-    right: 0,
-    width: 32,
-    height: 32,
-    borderRadius: RADIUS.full,
+    top: -5,
+    right: -5,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     backgroundColor: COLORS.primary,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 2,
     borderColor: COLORS.white,
+  },
+  profileInfo: {
+    flex: 1,
   },
   profileName: {
     fontSize: FONT_SIZES.xl,
@@ -387,51 +469,81 @@ const styles = StyleSheet.create({
     fontSize: FONT_SIZES.sm,
     color: COLORS.white,
     opacity: 0.9,
+    marginBottom: SPACING.sm,
   },
-  nameInput: {
-    backgroundColor: "rgba(255,255,255,0.2)",
-    marginBottom: 0,
-  },
-  statsContainer: {
+  memberBadge: {
     flexDirection: "row",
-    justifyContent: "space-around",
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.2)",
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xs,
+    borderRadius: RADIUS.md,
+    alignSelf: "flex-start",
+    marginBottom: SPACING.xs,
+    gap: SPACING.xs,
+  },
+  memberText: {
+    fontSize: FONT_SIZES.xs,
+    fontWeight: FONT_WEIGHTS.bold,
+    color: COLORS.white,
+  },
+  memberSince: {
+    fontSize: FONT_SIZES.xs,
+    color: COLORS.white,
+    opacity: 0.8,
+  },
+  statsCard: {
+    marginBottom: SPACING.lg,
+  },
+  sectionTitle: {
+    fontSize: FONT_SIZES.lg,
+    fontWeight: FONT_WEIGHTS.bold,
+    color: COLORS.textPrimary,
+    marginBottom: SPACING.base,
+  },
+  statsGrid: {
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   statItem: {
     alignItems: "center",
-    gap: SPACING.xs,
+    flex: 1,
+  },
+  statIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: RADIUS.md,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: SPACING.sm,
   },
   statValue: {
     fontSize: FONT_SIZES.lg,
     fontWeight: FONT_WEIGHTS.bold,
-    color: COLORS.white,
+    color: COLORS.textPrimary,
+    marginBottom: SPACING.xs,
   },
   statLabel: {
     fontSize: FONT_SIZES.xs,
-    color: COLORS.white,
-    opacity: 0.9,
+    color: COLORS.textSecondary,
+    textAlign: "center",
   },
   editCard: {
-    marginHorizontal: SPACING.lg,
-    marginBottom: SPACING.base,
-  },
-  infoCard: {
-    marginHorizontal: SPACING.lg,
-    marginBottom: SPACING.base,
-  },
-  sectionTitle: {
-    fontSize: FONT_SIZES.md,
-    fontWeight: FONT_WEIGHTS.semiBold,
-    color: COLORS.textPrimary,
-    marginBottom: SPACING.base,
+    marginBottom: SPACING.lg,
   },
   form: {
     gap: SPACING.sm,
     marginBottom: SPACING.lg,
   },
+  infoCard: {
+    marginBottom: SPACING.lg,
+  },
   infoItem: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: SPACING.base,
+    paddingVertical: SPACING.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
     gap: SPACING.base,
   },
   infoText: {
@@ -440,47 +552,69 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   menuCard: {
-    marginHorizontal: SPACING.lg,
-    marginBottom: SPACING.base,
+    marginBottom: SPACING.lg,
   },
   menuItem: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: SPACING.sm,
+    paddingVertical: SPACING.base,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
+  },
+  lastMenuItem: {
+    borderBottomWidth: 0,
   },
   menuItemLeft: {
     flexDirection: "row",
     alignItems: "center",
-    gap: SPACING.base,
+    flex: 1,
   },
   menuIcon: {
     width: 40,
     height: 40,
     borderRadius: RADIUS.md,
+    backgroundColor: `${COLORS.primary}15`,
     alignItems: "center",
     justifyContent: "center",
+    marginRight: SPACING.base,
   },
   menuTitle: {
-    fontSize: FONT_SIZES.sm,
+    fontSize: FONT_SIZES.base,
     fontWeight: FONT_WEIGHTS.medium,
     color: COLORS.textPrimary,
+    flex: 1,
+  },
+  menuItemRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: SPACING.sm,
+  },
+  badge: {
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xs,
+    borderRadius: RADIUS.full,
+    minWidth: 20,
+    alignItems: "center",
+  },
+  badgeText: {
+    fontSize: FONT_SIZES.xs,
+    fontWeight: FONT_WEIGHTS.bold,
+    color: COLORS.white,
   },
   logoutCard: {
-    marginHorizontal: SPACING.lg,
-    marginBottom: SPACING.base,
+    marginBottom: SPACING.lg,
   },
   logoutButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: SPACING.sm,
+    paddingVertical: SPACING.base,
     gap: SPACING.sm,
   },
   logoutText: {
-    fontSize: FONT_SIZES.sm,
+    fontSize: FONT_SIZES.base,
     fontWeight: FONT_WEIGHTS.semiBold,
     color: COLORS.error,
   },
@@ -492,5 +626,9 @@ const styles = StyleSheet.create({
   appInfoText: {
     fontSize: FONT_SIZES.xs,
     color: COLORS.textTertiary,
+    textAlign: "center",
+  },
+  bottomSpacer: {
+    height: 80,
   },
 });

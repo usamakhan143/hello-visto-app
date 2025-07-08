@@ -33,7 +33,6 @@ interface TourCardProps {
     businessName: string;
     logo?: string;
     rating: number;
-    responseTime?: string;
   };
 }
 
@@ -68,7 +67,9 @@ export default function TourCard({
         </View>
         <View style={styles.ratingContainer}>
           <Ionicons name="star" size={16} color={COLORS.warning} />
-          <Text style={styles.rating}>{tour.rating.toFixed(1)}</Text>
+          <Text style={styles.rating}>
+            {Number(tour.rating || 0).toFixed(1)}
+          </Text>
         </View>
 
         {/* Wishlist Button */}
@@ -142,11 +143,6 @@ export default function TourCard({
                     <Ionicons name="star" size={12} color={COLORS.warning} />
                     <Text style={styles.vendorRatingText}>{vendor.rating}</Text>
                   </View>
-                  {vendor.responseTime && (
-                    <Text style={styles.responseTime}>
-                      • {vendor.responseTime}
-                    </Text>
-                  )}
                 </View>
               </View>
               <Ionicons
@@ -317,10 +313,5 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: COLORS.textSecondary,
     marginLeft: 2,
-  },
-  responseTime: {
-    fontSize: 11,
-    color: COLORS.textTertiary,
-    marginLeft: 6,
   },
 });

@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   TextInput,
   Image,
+  ImageBackground,
   Dimensions,
   RefreshControl,
   StatusBar,
@@ -56,7 +57,6 @@ const mockVendors = {
     totalReviews: 145,
     totalTours: 24,
     completedBookings: 856,
-    responseTime: "< 2 hours",
     memberSince: "2019",
     languages: ["English", "German", "French", "Arabic"],
     specialties: ["Luxury Tours", "Adventure Travel", "Cultural Experiences"],
@@ -77,7 +77,6 @@ const mockVendors = {
     totalReviews: 289,
     totalTours: 15,
     completedBookings: 567,
-    responseTime: "< 1 hour",
     memberSince: "2020",
     languages: ["English", "French", "Hindi"],
     specialties: ["Luxury Resorts", "Water Sports", "Spa Retreats"],
@@ -98,7 +97,6 @@ const mockVendors = {
     totalReviews: 156,
     totalTours: 18,
     completedBookings: 423,
-    responseTime: "< 3 hours",
     memberSince: "2018",
     languages: ["English", "Japanese", "Korean"],
     specialties: ["Cultural Tours", "Food Experiences", "Traditional Arts"],
@@ -401,15 +399,6 @@ export default function EnhancedDashboardScreen({
           </View>
           <Text style={styles.priceLabel}>per person</Text>
         </BlurView>
-
-        {/* Rating Badge */}
-        <View style={styles.ratingContainer}>
-          <BlurView intensity={80} style={styles.ratingBadge}>
-            <Ionicons name="star" size={14} color={COLORS.warning} />
-            <Text style={styles.ratingText}>{item.rating}</Text>
-            <Text style={styles.reviewCount}>({item.totalReviews})</Text>
-          </BlurView>
-        </View>
       </View>
 
       <LinearGradient
@@ -417,6 +406,15 @@ export default function EnhancedDashboardScreen({
         style={styles.tourContentOverlay}
       >
         <View style={styles.tourContent}>
+          {/* Rating Badge */}
+          <View style={styles.inlineRatingContainer}>
+            <BlurView intensity={80} style={styles.ratingBadge}>
+              <Ionicons name="star" size={14} color={COLORS.warning} />
+              <Text style={styles.ratingText}>{item.rating}</Text>
+              <Text style={styles.reviewCount}>({item.totalReviews})</Text>
+            </BlurView>
+          </View>
+
           <Text style={styles.tourTitle} numberOfLines={2}>
             {item.title}
           </Text>
@@ -479,13 +477,6 @@ export default function EnhancedDashboardScreen({
                     {
                       mockVendors[item.vendorId as keyof typeof mockVendors]
                         .rating
-                    }
-                  </Text>
-                  <Text style={styles.vendorResponse}>
-                    •{" "}
-                    {
-                      mockVendors[item.vendorId as keyof typeof mockVendors]
-                        .responseTime
                     }
                   </Text>
                 </View>
@@ -602,10 +593,6 @@ export default function EnhancedDashboardScreen({
                     <View style={styles.notificationDot} />
                   </TouchableOpacity>
                 </View>
-              </View>
-
-              <View style={styles.logoSection}>
-                <Logo size="medium" showText={true} />
               </View>
             </SafeAreaView>
           </LinearGradient>
@@ -820,28 +807,53 @@ export default function EnhancedDashboardScreen({
         </View>
 
         {/* CTA Section */}
-        <Card variant="elevated" style={styles.ctaCard}>
-          <LinearGradient
-            colors={[COLORS.primary, COLORS.secondary, COLORS.accent]}
-            locations={[0, 0.5, 1]}
-            style={styles.ctaGradient}
+        <View style={styles.ctaCard}>
+          <ImageBackground
+            source={{
+              uri: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
+            }}
+            style={styles.ctaBackground}
+            imageStyle={styles.ctaBackgroundImage}
           >
-            <Text style={styles.ctaTitle}>Ready for your next adventure?</Text>
-            <Text style={styles.ctaDescription}>
-              Discover exclusive destinations and create unforgettable memories
-              with our premium travel experiences.
-            </Text>
-            <Button
-              title="Explore Premium Tours"
-              variant="white"
-              size="lg"
-              icon="arrow-forward"
-              iconPosition="right"
-              onPress={() => navigation.navigate("Search")}
-              style={styles.ctaButton}
-            />
-          </LinearGradient>
-        </Card>
+            <LinearGradient
+              colors={["rgba(0,0,0,0.3)", "rgba(0,0,0,0.6)"]}
+              style={styles.ctaOverlay}
+            >
+              <View style={styles.ctaContent}>
+                <Ionicons
+                  name="compass-outline"
+                  size={48}
+                  color={COLORS.white}
+                  style={styles.ctaIcon}
+                />
+                <Text style={styles.ctaTitle}>
+                  Ready for your next adventure?
+                </Text>
+                <Text style={styles.ctaDescription}>
+                  Discover breathtaking destinations and create memories that
+                  last a lifetime
+                </Text>
+                <TouchableOpacity
+                  style={styles.ctaButton}
+                  onPress={() => navigation.navigate("Search")}
+                  activeOpacity={0.9}
+                >
+                  <LinearGradient
+                    colors={[COLORS.white, "#f8f9fa"]}
+                    style={styles.ctaButtonGradient}
+                  >
+                    <Text style={styles.ctaButtonText}>Start Exploring</Text>
+                    <Ionicons
+                      name="arrow-forward"
+                      size={20}
+                      color={COLORS.primary}
+                    />
+                  </LinearGradient>
+                </TouchableOpacity>
+              </View>
+            </LinearGradient>
+          </ImageBackground>
+        </View>
 
         <View style={styles.bottomSpacer} />
       </Animated.ScrollView>
@@ -936,13 +948,11 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.full,
     backgroundColor: COLORS.error,
   },
-  logoSection: {
-    alignItems: "center",
-    marginTop: SPACING.base,
-  },
+
   searchSection: {
     paddingHorizontal: SPACING.lg,
     marginBottom: SPACING.lg,
+    marginTop: -80,
   },
   searchCard: {
     padding: SPACING.lg,
@@ -1138,10 +1148,9 @@ const styles = StyleSheet.create({
     opacity: 0.8,
     textAlign: "center",
   },
-  ratingContainer: {
-    position: "absolute",
-    bottom: SPACING["6xl"],
-    left: SPACING.base,
+  inlineRatingContainer: {
+    alignSelf: "flex-start",
+    marginBottom: SPACING.sm,
   },
   ratingBadge: {
     flexDirection: "row",
@@ -1188,7 +1197,7 @@ const styles = StyleSheet.create({
   },
   tourMeta: {
     flexDirection: "row",
-    gap: SPACING.base,
+    gap: SPACING.lg,
     marginBottom: SPACING.base,
   },
   metaItem: {
@@ -1346,13 +1355,30 @@ const styles = StyleSheet.create({
   },
   ctaCard: {
     marginHorizontal: SPACING.lg,
-    marginBottom: SPACING.lg,
-    padding: 0,
+    marginBottom: 80,
+    borderRadius: RADIUS.xl,
     overflow: "hidden",
+    ...SHADOWS.lg,
   },
-  ctaGradient: {
-    padding: SPACING.xl,
+  ctaBackground: {
+    height: 280,
+    justifyContent: "center",
+  },
+  ctaBackgroundImage: {
+    borderRadius: RADIUS.xl,
+  },
+  ctaOverlay: {
+    flex: 1,
+    justifyContent: "center",
     alignItems: "center",
+  },
+  ctaContent: {
+    alignItems: "center",
+    paddingHorizontal: SPACING.xl,
+  },
+  ctaIcon: {
+    marginBottom: SPACING.lg,
+    opacity: 0.9,
   },
   ctaTitle: {
     fontSize: FONT_SIZES["2xl"],
@@ -1360,17 +1386,38 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     textAlign: "center",
     marginBottom: SPACING.base,
+    textShadowColor: "rgba(0,0,0,0.3)",
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
   ctaDescription: {
     fontSize: FONT_SIZES.base,
     color: COLORS.white,
     textAlign: "center",
-    opacity: 0.9,
+    opacity: 0.95,
     marginBottom: SPACING.xl,
-    lineHeight: FONT_SIZES.base * 1.5,
+    lineHeight: FONT_SIZES.base * 1.6,
+    maxWidth: "85%",
+    textShadowColor: "rgba(0,0,0,0.2)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   ctaButton: {
-    minWidth: 200,
+    borderRadius: RADIUS.full,
+    overflow: "hidden",
+    ...SHADOWS.md,
+  },
+  ctaButtonGradient: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: SPACING.xl,
+    paddingVertical: SPACING.base,
+    gap: SPACING.sm,
+  },
+  ctaButtonText: {
+    fontSize: FONT_SIZES.base,
+    fontWeight: FONT_WEIGHTS.semiBold,
+    color: COLORS.primary,
   },
   bottomSpacer: {
     height: SPACING["4xl"],

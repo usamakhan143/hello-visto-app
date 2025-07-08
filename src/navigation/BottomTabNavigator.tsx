@@ -1,8 +1,15 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { View, Text, StyleSheet, Platform } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Platform,
+  TouchableOpacity,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
+import { LinearGradient } from "expo-linear-gradient";
 import { COLORS, SPACING, RADIUS, SHADOWS } from "../constants";
 import { responsiveFont, responsiveSize } from "../utils/responsiveFont";
 
@@ -35,14 +42,35 @@ const TabBarIcon: React.FC<TabBarIconProps> = ({
   color,
   iconName,
 }) => {
+  if (focused) {
+    return (
+      <View style={styles.tabIconContainer}>
+        <LinearGradient
+          colors={[COLORS.primary, COLORS.primaryLight || COLORS.accent]}
+          style={styles.focusedTabIcon}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        >
+          <Ionicons
+            name={iconName as any}
+            size={responsiveSize(24)}
+            color={COLORS.white}
+          />
+        </LinearGradient>
+        <View style={styles.focusedGlow} />
+      </View>
+    );
+  }
+
   return (
-    <View style={[styles.tabIconContainer, focused && styles.focusedTabIcon]}>
-      <Ionicons
-        name={iconName as any}
-        size={responsiveSize(focused ? 26 : 24)}
-        color={color}
-      />
-      {focused && <View style={styles.focusedIndicator} />}
+    <View style={styles.tabIconContainer}>
+      <View style={styles.inactiveTabIcon}>
+        <Ionicons
+          name={iconName as any}
+          size={responsiveSize(22)}
+          color={color}
+        />
+      </View>
     </View>
   );
 };
@@ -54,8 +82,11 @@ const TabBarLabel: React.FC<{ focused: boolean; children: string }> = ({
   <Text
     style={[
       styles.tabLabel,
-      { color: focused ? COLORS.primary : COLORS.textSecondary },
-      focused && styles.focusedTabLabel,
+      {
+        color: focused ? COLORS.primary : COLORS.textSecondary,
+        fontWeight: focused ? "700" : "500",
+        opacity: focused ? 1 : 0.7,
+      },
     ]}
     maxFontSizeMultiplier={1.2}
   >
@@ -105,16 +136,19 @@ export function VendorBottomTabs() {
         tabBarActiveTintColor: COLORS.primary,
         tabBarInactiveTintColor: COLORS.textSecondary,
         tabBarStyle: styles.tabBar,
-        tabBarBackground: () =>
-          Platform.OS === "ios" ? (
+        tabBarBackground: () => (
+          <View style={styles.tabBarBackground}>
             <BlurView
-              intensity={100}
+              intensity={Platform.OS === "ios" ? 80 : 0}
               style={StyleSheet.absoluteFill}
               tint="light"
             />
-          ) : (
-            <View style={styles.androidTabBarBackground} />
-          ),
+            <LinearGradient
+              colors={["rgba(255,255,255,0.9)", "rgba(255,255,255,0.95)"]}
+              style={StyleSheet.absoluteFill}
+            />
+          </View>
+        ),
         headerShown: false,
         tabBarHideOnKeyboard: true,
       })}
@@ -190,16 +224,19 @@ export function CustomerBottomTabs() {
         tabBarActiveTintColor: COLORS.primary,
         tabBarInactiveTintColor: COLORS.textSecondary,
         tabBarStyle: styles.tabBar,
-        tabBarBackground: () =>
-          Platform.OS === "ios" ? (
+        tabBarBackground: () => (
+          <View style={styles.tabBarBackground}>
             <BlurView
-              intensity={100}
+              intensity={Platform.OS === "ios" ? 80 : 0}
               style={StyleSheet.absoluteFill}
               tint="light"
             />
-          ) : (
-            <View style={styles.androidTabBarBackground} />
-          ),
+            <LinearGradient
+              colors={["rgba(255,255,255,0.9)", "rgba(255,255,255,0.95)"]}
+              style={StyleSheet.absoluteFill}
+            />
+          </View>
+        ),
         headerShown: false,
         tabBarHideOnKeyboard: true,
       })}
@@ -215,44 +252,69 @@ export function CustomerBottomTabs() {
 
 const styles = StyleSheet.create({
   tabBar: {
-    height: responsiveSize(85),
+    height: responsiveSize(90),
     paddingBottom:
-      Platform.OS === "ios" ? responsiveSize(20) : responsiveSize(10),
-    paddingTop: responsiveSize(10),
+      Platform.OS === "ios" ? responsiveSize(30) : responsiveSize(15),
+    paddingTop: responsiveSize(8),
     paddingHorizontal: SPACING.base,
     borderTopWidth: 0,
-    elevation: 20,
-    ...SHADOWS.lg,
+    borderTopLeftRadius: RADIUS.xl,
+    borderTopRightRadius: RADIUS.xl,
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    ...SHADOWS.xl,
   },
-  androidTabBarBackground: {
+  tabBarBackground: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: COLORS.surface,
+    borderTopLeftRadius: RADIUS.xl,
+    borderTopRightRadius: RADIUS.xl,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.2)",
+    borderBottomWidth: 0,
   },
   tabIconContainer: {
     alignItems: "center",
-    justifyContent: "center",
-    width: responsiveSize(50),
-    height: responsiveSize(35),
-    borderRadius: RADIUS.md,
-    marginBottom: responsiveSize(2),
+    justifyContent: "flex-start",
+    position: "relative",
+    height: responsiveSize(65),
+    paddingTop: responsiveSize(12),
   },
   focusedTabIcon: {
-    backgroundColor: `${COLORS.primary}15`,
+    width: responsiveSize(40),
+    height: responsiveSize(40),
+    borderRadius: responsiveSize(20),
+    alignItems: "center",
+    justifyContent: "center",
+    ...SHADOWS.md,
   },
-  focusedIndicator: {
+  focusedGlow: {
     position: "absolute",
-    bottom: -responsiveSize(8),
-    width: responsiveSize(20),
-    height: responsiveSize(3),
+    top: responsiveSize(11),
+    left: -1,
+    right: -1,
+    width: responsiveSize(42),
+    height: responsiveSize(42),
+    borderRadius: responsiveSize(22),
     backgroundColor: COLORS.primary,
-    borderRadius: RADIUS.full,
+    opacity: 0.08,
+    zIndex: -1,
+  },
+  inactiveTabIcon: {
+    width: responsiveSize(36),
+    height: responsiveSize(36),
+    borderRadius: responsiveSize(18),
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "transparent",
   },
   tabLabel: {
-    fontSize: responsiveFont(11),
-    fontWeight: "500",
+    fontSize: responsiveFont(9),
     textAlign: "center",
-  },
-  focusedTabLabel: {
-    fontWeight: "600",
+    position: "absolute",
+    bottom: responsiveSize(3),
+    left: 0,
+    right: 0,
   },
 });

@@ -170,10 +170,10 @@ export default function PremiumOnboardingScreen({
           {/* Dynamic Gradient Overlay */}
           <LinearGradient
             colors={[
+              "rgba(0,0,0,0.0)",
               "rgba(0,0,0,0.1)",
-              "rgba(0,0,0,0.3)",
+              "rgba(0,0,0,0.4)",
               "rgba(0,0,0,0.7)",
-              "rgba(0,0,0,0.9)",
             ]}
             locations={[0, 0.3, 0.7, 1]}
             style={styles.gradientOverlay}
@@ -246,7 +246,7 @@ export default function PremiumOnboardingScreen({
           >
             {/* Premium Icon */}
             <View style={styles.iconSection}>
-              <BlurView intensity={20} style={styles.iconContainer}>
+              <BlurView intensity={8} tint="light" style={styles.iconContainer}>
                 <LinearGradient
                   colors={item.gradient}
                   style={styles.iconGradient}
@@ -264,15 +264,20 @@ export default function PremiumOnboardingScreen({
             </View>
 
             {/* Stats Section */}
-            <BlurView intensity={15} style={styles.statsContainer}>
-              <View style={styles.statsGrid}>
-                {Object.entries(item.stats).map(([key, value], idx) => (
-                  <View key={idx} style={styles.statItem}>
-                    <Text style={styles.statValue}>{value}</Text>
-                    <Text style={styles.statLabel}>{key.toUpperCase()}</Text>
-                  </View>
-                ))}
-              </View>
+            <BlurView intensity={6} tint="dark" style={styles.statsContainer}>
+              <LinearGradient
+                colors={["rgba(255,255,255,0.08)", "rgba(255,255,255,0.04)"]}
+                style={styles.statsOverlay}
+              >
+                <View style={styles.statsGrid}>
+                  {Object.entries(item.stats).map(([key, value], idx) => (
+                    <View key={idx} style={styles.statItem}>
+                      <Text style={styles.statValue}>{value}</Text>
+                      <Text style={styles.statLabel}>{key.toUpperCase()}</Text>
+                    </View>
+                  ))}
+                </View>
+              </LinearGradient>
             </BlurView>
           </Animated.View>
         </ImageBackground>
@@ -290,7 +295,7 @@ export default function PremiumOnboardingScreen({
 
       {/* Header */}
       <SafeAreaView style={styles.header}>
-        <BlurView intensity={20} style={styles.headerContent}>
+        <BlurView intensity={8} tint="dark" style={styles.headerContent}>
           <View style={styles.logoSection}>
             <Image
               source={{
@@ -304,7 +309,7 @@ export default function PremiumOnboardingScreen({
           </View>
 
           <TouchableOpacity style={styles.skipButton} onPress={handleSkip}>
-            <BlurView intensity={20} style={styles.skipBlur}>
+            <BlurView intensity={6} tint="dark" style={styles.skipBlur}>
               <Text style={styles.skipText}>Skip</Text>
             </BlurView>
           </TouchableOpacity>
@@ -326,7 +331,7 @@ export default function PremiumOnboardingScreen({
 
       {/* Footer */}
       <SafeAreaView style={styles.footer}>
-        <BlurView intensity={25} style={styles.footerContent}>
+        <BlurView intensity={10} tint="dark" style={styles.footerContent}>
           {/* Advanced Pagination */}
           <View style={styles.pagination}>
             {onboardingData.map((_, index) => (
@@ -418,6 +423,9 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.base,
     borderRadius: RADIUS.lg,
     margin: SPACING.base,
+    backgroundColor: "rgba(255,255,255,0.05)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
   },
   logoSection: {
     alignItems: "center",
@@ -447,6 +455,7 @@ const styles = StyleSheet.create({
   skipBlur: {
     paddingHorizontal: SPACING.base,
     paddingVertical: SPACING.sm,
+    backgroundColor: "rgba(255,255,255,0.1)",
   },
   skipText: {
     fontSize: FONT_SIZES.sm,
@@ -500,6 +509,9 @@ const styles = StyleSheet.create({
   iconContainer: {
     borderRadius: RADIUS.full,
     overflow: "hidden",
+    backgroundColor: "rgba(255,255,255,0.08)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.15)",
   },
   iconGradient: {
     width: 100,
@@ -544,6 +556,12 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.xl,
     overflow: "hidden",
     marginHorizontal: SPACING.base,
+    backgroundColor: "rgba(255,255,255,0.03)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.08)",
+  },
+  statsOverlay: {
+    borderRadius: RADIUS.xl,
   },
   statsGrid: {
     flexDirection: "row",
@@ -578,6 +596,9 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.xl,
     paddingVertical: SPACING.lg,
     paddingHorizontal: SPACING.lg,
+    backgroundColor: "rgba(255,255,255,0.06)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.12)",
   },
   pagination: {
     flexDirection: "row",
@@ -601,10 +622,12 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     height: 4,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
     borderRadius: RADIUS.full,
     marginBottom: SPACING.lg,
     overflow: "hidden",
+    borderWidth: 0.5,
+    borderColor: "rgba(255,255,255,0.1)",
   },
   progressFill: {
     height: "100%",

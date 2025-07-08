@@ -9,10 +9,12 @@ import {
   Dimensions,
   FlatList,
   Linking,
+  StatusBar,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { BlurView } from "expo-blur";
 import Button from "../../components/ui/Button";
 import Card from "../../components/ui/Card";
 import {
@@ -79,7 +81,6 @@ export default function TourDetailsScreen({
     totalReviews: 145,
     totalTours: 24,
     completedBookings: 856,
-    responseTime: "< 2 hours",
     memberSince: "2019",
     languages: ["English", "German", "French", "Arabic"],
     specialties: ["Luxury Tours", "Adventure Travel", "Cultural Experiences"],
@@ -247,9 +248,6 @@ export default function TourDetailsScreen({
                     ({mockVendor.totalReviews} reviews)
                   </Text>
                 </View>
-                <Text style={styles.agencyResponse}>
-                  • {mockVendor.responseTime}
-                </Text>
               </View>
             </View>
           </View>
@@ -418,23 +416,25 @@ export default function TourDetailsScreen({
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
+
+      {/* Standard Header - Consistent with other screens */}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Ionicons name="chevron-back" size={24} color={COLORS.white} />
+          <Ionicons name="chevron-back" size={24} color={COLORS.textPrimary} />
         </TouchableOpacity>
-
+        <Text style={styles.headerTitle}>Tour Details</Text>
         <TouchableOpacity
-          style={[styles.actionButton, isWishlisted && styles.activeWishlist]}
+          style={styles.actionButton}
           onPress={() => setIsWishlisted(!isWishlisted)}
         >
           <Ionicons
             name={isWishlisted ? "heart" : "heart-outline"}
             size={24}
-            color={isWishlisted ? COLORS.error : COLORS.white}
+            color={isWishlisted ? COLORS.error : COLORS.textPrimary}
           />
         </TouchableOpacity>
       </View>
@@ -479,8 +479,12 @@ export default function TourDetailsScreen({
               <Text style={styles.title}>{tour.title}</Text>
               <View style={styles.ratingContainer}>
                 <Ionicons name="star" size={16} color={COLORS.warning} />
-                <Text style={styles.rating}>{tour.rating}</Text>
-                <Text style={styles.reviewCount}>({tour.totalReviews})</Text>
+                <Text style={styles.rating}>
+                  {Number(tour.rating || 0).toFixed(1)}
+                </Text>
+                <Text style={styles.reviewCount}>
+                  ({tour.totalReviews || 0})
+                </Text>
               </View>
             </View>
 
@@ -565,39 +569,45 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   header: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: SPACING.lg,
-    paddingTop: 50,
-    paddingBottom: SPACING.base,
-    zIndex: 100,
+    paddingVertical: SPACING.base,
   },
   backButton: {
     width: 40,
     height: 40,
-    borderRadius: RADIUS.full,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    borderRadius: RADIUS.md,
+    backgroundColor: COLORS.surface,
     alignItems: "center",
     justifyContent: "center",
+    shadowColor: COLORS.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  headerTitle: {
+    fontSize: FONT_SIZES.lg,
+    fontWeight: FONT_WEIGHTS.bold,
+    color: COLORS.textPrimary,
   },
   actionButton: {
     width: 40,
     height: 40,
-    borderRadius: RADIUS.full,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    borderRadius: RADIUS.md,
+    backgroundColor: COLORS.surface,
     alignItems: "center",
     justifyContent: "center",
-  },
-  activeWishlist: {
-    backgroundColor: COLORS.surface,
+    shadowColor: COLORS.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   imageContainer: {
-    height: height * 0.4,
+    height: height * 0.3,
     position: "relative",
   },
   tourImage: {

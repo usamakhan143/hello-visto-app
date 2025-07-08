@@ -128,6 +128,11 @@ function AppNavigator() {
             <Stack.Screen
               name="VendorProfile"
               component={VendorProfileScreen}
+              options={{
+                cardStyle: { backgroundColor: "transparent" },
+                cardOverlay: () => null,
+                presentation: "transparentModal",
+              }}
             />
             <Stack.Screen name="AddTour" component={AddTourScreen} />
             <Stack.Screen name="Profile" component={ProfileScreen} />

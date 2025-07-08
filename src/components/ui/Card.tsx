@@ -23,12 +23,12 @@ export default function Card({
     const baseStyles = [
       styles.card,
       {
-        padding: SPACING[padding],
-        borderRadius: RADIUS[borderRadius],
+        padding: SPACING[padding] || SPACING.base,
+        borderRadius: RADIUS[borderRadius] || RADIUS.lg,
       },
     ];
 
-    if (margin) {
+    if (margin && SPACING[margin]) {
       baseStyles.push({ margin: SPACING[margin] });
     }
 

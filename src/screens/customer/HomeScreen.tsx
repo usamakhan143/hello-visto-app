@@ -141,10 +141,6 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         >
           <View style={styles.headerContent}>
             <View style={styles.userInfo}>
-              <Image
-                source={{ uri: "https://via.placeholder.com/40" }}
-                style={styles.avatar}
-              />
               <View>
                 <Text style={styles.greeting}>Good morning</Text>
                 <Text style={styles.userName}>Ahmed Riaz</Text>
@@ -300,12 +296,6 @@ const styles = StyleSheet.create({
   userInfo: {
     flexDirection: "row",
     alignItems: "center",
-  },
-  avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: 12,
   },
   greeting: {
     fontSize: 14,
